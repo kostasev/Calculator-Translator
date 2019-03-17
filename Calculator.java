@@ -2,15 +2,13 @@ import java.io.InputStream;
 import java.io.IOException;
 
 class Calculator {
-//1&(2&(2^8)&(2^3))
+
 	private int lookaheadToken;
-	private int tempSum;
 	private int openPar;
 	private InputStream in;
 
 	public Calculator(InputStream in) throws IOException {
 		this.in = in;
-		this.tempSum = 0;
 		this.openPar = 0;
 		lookaheadToken = in.read();
 	}
@@ -21,91 +19,86 @@ class Calculator {
 		lookaheadToken = in.read();
 	}
 
-	public int calc( int a, int op, int b) throws IOException, ParseError {
-		switch(op){
-			case '&':
-				return ( a & b );
-			case '^':
-				return ( a ^ b );
-			default:
-				throw new ParseError();
-		}
-	}
-
-	private void Expr() throws IOException, ParseError {
+	private int Expr() throws IOException, ParseError {
 	    System.out.println("EXPR");
-		int a;
-		//if(lookaheadToken < '0' || lookaheadToken > '9')
-		//    throw new ParseError();
-		a = lookaheadToken - '0';
-		//consume(lookaheadToken);
-		Term();
-		Expr2();
-		return;
+        int termVal=0, expr2Val=0;
+        termVal = Term();
+        if ((expr2Val = Expr2())>=0)
+            termVal ^= expr2Val;
+		return termVal;
 	}
 
-	private void Expr2() throws IOException, ParseError {
+	private int Expr2() throws IOException, ParseError {
         System.out.println("EXPR2");
+        int termVal=0, expr2Val=0;
         if(lookaheadToken == ')' ){
             openPar--;
             consume(lookaheadToken);
-            return;
+            return -1;
         }
         if( lookaheadToken == '\n' || lookaheadToken == -1)
-			return;
+			return -1;
 
-		if(lookaheadToken != '&')
-			return;
-		consume(lookaheadToken);
-		Term();
-		Expr2();
-	}
-
-	private void Term() throws IOException, ParseError {
-        System.out.println("TERM");
-		int a;
-		if (lookaheadToken >= '0' && lookaheadToken <= '9')
-            consume(lookaheadToken);
-        else if (lookaheadToken=='(') {
-            openPar++;
-            consume(lookaheadToken);
-            Expr();
-        }
-		if ((lookaheadToken < '0' || lookaheadToken > '9') && lookaheadToken!='(')
-		    Term2();
-		return;
-	}
-
-	private void Term2() throws IOException, ParseError {
-        System.out.println("TERM2");
-		int a;
-        if(lookaheadToken == ')' ){
-            openPar--;
-            consume(lookaheadToken);
-            return;
-        }
-        if( lookaheadToken == '\n' || lookaheadToken == -1)
-            return;
 		if(lookaheadToken != '^')
-			return;
+			return -1;
 		consume(lookaheadToken);
-		if (lookaheadToken == '('){
-            consume(lookaheadToken);
-            openPar++;
-			Expr();
-			return;
-		}
-		else if (lookaheadToken < '0' || lookaheadToken > '9')
-			throw new ParseError();
-		else
-    		consume(lookaheadToken);
-		Term2();
-		return;
+		termVal = Term();
+		if ((expr2Val = Expr2())>=0)
+		    termVal ^= expr2Val;
+		return termVal;
 	}
+
+	private int Term() throws IOException, ParseError {
+        System.out.println("TERM");
+		int factorVal = factor(), recVal=-1;
+		//if ((lookaheadToken < '0' || lookaheadToken > '9') && lookaheadToken!='('){
+            if ((recVal=Term2())>=0)
+                factorVal &=recVal;
+        //}
+		return factorVal;
+	}
+
+	private int Term2() throws IOException, ParseError {
+        System.out.println("TERM2");
+		int factorVal=0,recVal=-1;
+        if(lookaheadToken == ')' ){
+            openPar--;
+            consume(lookaheadToken);
+            return -1;
+        }
+        if( lookaheadToken == '\n' || lookaheadToken == -1)
+            return -1;
+		if(lookaheadToken != '&')
+			return -1;
+		consume(lookaheadToken);
+        factorVal=factor();
+		if ((recVal=Term2())>=0)
+		    factorVal &=recVal;
+		return factorVal;
+	}
+
+	private int factor() throws IOException, ParseError {
+        int factorVal=0;
+		if (lookaheadToken >= '0' && lookaheadToken <= '9') {
+            factorVal = lookaheadToken - '0';
+            consume(lookaheadToken);
+        }
+		else if (lookaheadToken=='(') {
+            openPar++;
+            consume(lookaheadToken);
+            factorVal=Expr();
+        }
+        if( lookaheadToken == '\n' || lookaheadToken == -1)
+            return factorVal;
+		//consume(lookaheadToken);
+        return factorVal;
+    }
 
 	public void parse() throws IOException, ParseError {
         System.out.println("PARSE");
-		Expr();
+		int exprVal = 0 ;
+        exprVal = Expr();
+        System.out.println(exprVal);
 		if ((lookaheadToken != '\n' && lookaheadToken != -1) || openPar!=0)
 			throw new ParseError();
 	}
