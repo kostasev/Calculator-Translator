@@ -20,7 +20,6 @@ class Calculator {
 	}
 
 	private int Expr() throws IOException, ParseError {
-	    System.out.println("EXPR");
         int termVal=0, expr2Val=0;
         termVal = Term();
         if ((expr2Val = Expr2())>=0)
@@ -29,7 +28,6 @@ class Calculator {
 	}
 
 	private int Expr2() throws IOException, ParseError {
-        System.out.println("EXPR2");
         int termVal=0, expr2Val=0;
         if(lookaheadToken == ')' ){
             openPar--;
@@ -49,17 +47,13 @@ class Calculator {
 	}
 
 	private int Term() throws IOException, ParseError {
-        System.out.println("TERM");
 		int factorVal = factor(), recVal=-1;
-		//if ((lookaheadToken < '0' || lookaheadToken > '9') && lookaheadToken!='('){
-            if ((recVal=Term2())>=0)
-                factorVal &=recVal;
-        //}
+		if ((recVal=Term2())>=0)
+		    factorVal &=recVal;
 		return factorVal;
 	}
 
 	private int Term2() throws IOException, ParseError {
-        System.out.println("TERM2");
 		int factorVal=0,recVal=-1;
         if(lookaheadToken == ')' ){
             openPar--;
@@ -88,19 +82,18 @@ class Calculator {
             consume(lookaheadToken);
             factorVal=Expr();
         }
-        if( lookaheadToken == '\n' || lookaheadToken == -1)
-            return factorVal;
-		//consume(lookaheadToken);
+        else
+            throw new ParseError();
         return factorVal;
     }
 
-	public void parse() throws IOException, ParseError {
-        System.out.println("PARSE");
+	public void parse() throws IOException, ParseError { ;
 		int exprVal = 0 ;
         exprVal = Expr();
-        System.out.println(exprVal);
 		if ((lookaheadToken != '\n' && lookaheadToken != -1) || openPar!=0)
 			throw new ParseError();
+		else
+            System.out.println(exprVal);
 	}
 
 	public static void main(String[] args) {
