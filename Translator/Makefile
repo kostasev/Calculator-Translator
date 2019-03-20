@@ -10,3 +10,4 @@ execute:
 
 clean:
 	rm -f *.class *~
+	rm sym.java Parser.java Scanner.java
