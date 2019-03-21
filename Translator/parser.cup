@@ -21,7 +21,7 @@ scan with {: return s.next_token(); :};
  */
 
 /* Terminals (tokens returned by the scanner). */
-terminal            SEMI, PLUS, MINUS, TIMES, LPAREN, RPAREN;
+terminal            COM, PLUS, LPAREN, RPAREN, LBRA, RBRA, IFSYM, ELSESYM, PREFIX, SUFFIX;
 terminal String     STRING_LITERAL;        // our scanner provides numbers as strings
 
 /*  Non terminals */
