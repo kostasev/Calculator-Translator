@@ -56,8 +56,7 @@ LineTerminator = \r|\n|\r\n
 
 /* White space is a line terminator, space, tab, or line feed. */
 WhiteSpace     = {LineTerminator} | [ \t\f]
-Identifier     = []
-Constant       =
+Identifier = [:jletter:][:jletterdigit:]*
 
 %state STRING
 
@@ -77,12 +76,13 @@ Constant       =
  "else"         { return symbol(sym.ELSESYM); }
  "prefix"       { return symbol(sym.PREFIX); }
  "suffix"       { return symbol(sym.SUFFIX); }
- {WhiteSpace}   { /* just skip what was found, do nothing */ }
 }
 
+{WhiteSpace}   { /* just skip what was found, do nothing */ }
+{Identifier}   { return symbol(sym.IDENT); }
 <STRING> {
       \"                             { yybegin(YYINITIAL);
-                                       return symbol(sym.STRING_LITERAL, stringBuffer.toString()); }
+                                       return symbol(sym.STRINGL, stringBuffer.toString()); }
       [^\n\r\"\\]+                   { stringBuffer.append( yytext() ); }
       \\t                            { stringBuffer.append('\t'); }
       \\n                            { stringBuffer.append('\n'); }
@@ -92,8 +92,7 @@ Constant       =
       \\                             { stringBuffer.append('\\'); }
 }
 
-{Identifier}
-{Constant}
+//<<EOF>>                              { return null; }
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */
 [^]                    { throw new Error("Illegal character <"+yytext()+">"); }
