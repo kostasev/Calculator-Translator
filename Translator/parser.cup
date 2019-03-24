@@ -25,7 +25,7 @@ terminal            COM, PLUS, LPAREN, RPAREN, LBRA, RBRA, IFSYM, ELSESYM, PREFI
 terminal String     STRINGL, IDENT;        // our scanner provides numbers as strings
 
 /*  Non terminals */
-non terminal String 	prog,defs,def,calls,call,argsC,argsD,val,name,code1,ifstm,elsestm,cond,conds,oper,expr,exprs;
+non terminal String 	prog,defs,def,calls,call,argsC,argsC2,argsD,argsD2,val,code1,name,ifstm,cond,conds,oper,expr,exprs;
 
 /**
  *  Precedence Declarations
@@ -39,51 +39,53 @@ precedence left PLUS;
 prog 	::= defs:dfs calls:clls 								{: System.out.println("public class Main {\n" + clls + dfs + "\n}"); :}
 			;
 
-defs	::= def:df defs:dfs 									{: RESULT = df + dfs; :}
-			|def:df 											{: RESULT = df; :}
-			| 													{: RESULT = ""; :}
+defs	::= defs:dfs def:df 									{: RESULT = df + dfs; :}
+			|													{: RESULT = ""; :}
 			;
 
-def 	::= name:nm LPAREN argsD:rgs RPAREN LBRA code1:cd RBRA	{: RESULT = "\npublic static String " + nm + "( " + rgs + " ){ " + cd + "\n}"; :}
+def 	::= name:nm LPAREN argsD:rgs RPAREN LBRA code1:cd RBRA def:d1	{: RESULT = "\npublic static String " + nm + "( " + rgs + " ){ " + cd + "\n}"; :}
 			;
 calls 	::= call:cl calls:cls 									{: RESULT = cl + cls; :}
-			|call:cl 											{: RESULT = cl; :}
+			//|call:cl 											{: RESULT = cl; :}
 			|													{: RESULT = ""; :}
 			;
 
 call 	::= name:nm LPAREN argsC:rgs RPAREN 					{: RESULT = "\n\tSystem.out.println(" + nm + "( "+rgs+"));"; :}
 			;
 
-argsC 	::= val:vl COM argsC:rgsC								{: RESULT = vl + ","+ rgsC; :}
-			|val:vl 											{: RESULT = vl; :} 						
+argsC 	::= val:vl argsC2:rgsC								{: RESULT = vl + ","+ rgsC; :}
+			//|val:vl 											{: RESULT = vl; :} 						
+			| 													{: RESULT = ""; :}
+			;
+argsC2 	::= COM val:vl argsC:rgsC								{: RESULT = vl + ","+ rgsC; :}
+			//|val:vl 											{: RESULT = vl; :} 						
 			| 													{: RESULT = ""; :}
 			;
 
-argsD 	::= name:nm COM argsD:rgsD								{: RESULT = "String " + vl + ", "+ rgsC; :}
-			|name:nm 											{: RESULT = "String " + vl; :} 						
+
+argsD 	::= name:nm argsD2:rgsD									{: RESULT = "String " + nm + rgsD; :}
+			//|name:nm 											{: RESULT = "String " + vl; :} 						
 			| 													{: RESULT = ""; :}
 			;
-
+argsD2	::= COM name:nm argsD2:rgsD 							{: RESULT = ", String " + nm + rgsD; :}
+			| 
+			;
 val 	::= call:cl 											{: RESULT = cl; :}
 			| STRINGL:s 										{: RESULT = "\"" + s + "\""; :}
 			|ifstm:ifst 										{: RESULT = ifst; :}
 			;
 
-name 	::= IDENT:id 											{: RESULT = id; :}
+name 	::= IDENT:id 											{: RESULT = id ; :}
 			;
 
-code1 	::= name:nm 											{: RESULT = "return" + nm ";"; :}
-			| STRINGL:s 										{: RESULT = "return" + s ";"; :}
+code1 	::= name:nm 											{: RESULT = "return " + nm ";"; :}
 			| expr:xp 											{: RESULT = "return (" + xp ");"; :}	
-			| ifstm:ifst 										{: RESULT = ifst ; :}
+			//| val:vl 											{: RESULT = "return " + vl +" ;" ; :}
 			| 													{: RESULT = "return \"\";"; :}
 			;
 
-ifstm 	::= IFSYM LPAREN cond:cnd RPAREN LBRA code1:cd1 elsestm:els
-																{: RESULT = "if( "+cnd+"){\n"+cd1 +"\n}" + els; :}
-			;
-elsestm	::= ELSESYM LBRA code1:cd2 RBRA							{: RESULT = "else {"+cd2+"\n}"; :}
-			| 													{: RESULT = ""; :}
+ifstm 	::= IFSYM LPAREN cond:cnd RPAREN LBRA code1:cd1 ELSESYM LBRA code1:cd2 RBRA
+																{: RESULT = "if( "+cnd+"){\n"+cd1 +"\n}" + "else {"+cd2+"\n}"; :}
 			;
 cond 	::= val:vl conds:cnds   								{: RESULT = vl + cnds; :}
 			; 
@@ -97,6 +99,6 @@ oper 	::= PREFIX:pref 										{: RESULT = "pref "; :}
 
 expr 	::= val:vl exprs:exp 									{: RESULT =  vl + exp ;:}
 			;
-exprs 	::= PLUS:pls val:vl exprs:exp 							{: RESULT = pls + vl + exp; :}
+exprs 	::= PLUS val:vl exprs:exp 							{: RESULT = " + " + vl + exp; :}
 			| 													{: RESULT = "" ; :}
 			;
