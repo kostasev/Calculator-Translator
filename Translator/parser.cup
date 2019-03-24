@@ -44,6 +44,7 @@ defs	::= defs:dfs def:df 									{: RESULT = df + dfs; :}
 			;
 
 def 	::= name:nm LPAREN argsD:rgs RPAREN LBRA code1:cd RBRA def:d1	{: RESULT = "\npublic static String " + nm + "( " + rgs + " ){ " + cd + "\n}"; :}
+			|name:nm LPAREN RPAREN LBRA code1:cd RBRA def:d1	{: RESULT = "\npublic static String " + nm + "( ){ " + cd + "\n}"; :}
 			;
 calls 	::= call:cl calls:cls 									{: RESULT = cl + cls; :}
 			//|call:cl 											{: RESULT = cl; :}
@@ -51,11 +52,12 @@ calls 	::= call:cl calls:cls 									{: RESULT = cl + cls; :}
 			;
 
 call 	::= name:nm LPAREN argsC:rgs RPAREN 					{: RESULT = "\n\tSystem.out.println(" + nm + "( "+rgs+"));"; :}
+			|name:nm LPAREN RPAREN 					{: RESULT = "\n\tSystem.out.println(" + nm + "( ));"; :}
 			;
 
 argsC 	::= val:vl argsC2:rgsC								{: RESULT = vl + ","+ rgsC; :}
 			//|val:vl 											{: RESULT = vl; :} 						
-			| 													{: RESULT = ""; :}
+			//| 													{: RESULT = ""; :}
 			;
 argsC2 	::= COM val:vl argsC:rgsC								{: RESULT = vl + ","+ rgsC; :}
 			//|val:vl 											{: RESULT = vl; :} 						
@@ -65,7 +67,7 @@ argsC2 	::= COM val:vl argsC:rgsC								{: RESULT = vl + ","+ rgsC; :}
 
 argsD 	::= name:nm argsD2:rgsD									{: RESULT = "String " + nm + rgsD; :}
 			//|name:nm 											{: RESULT = "String " + vl; :} 						
-			| 													{: RESULT = ""; :}
+			//| 													{: RESULT = ""; :}
 			;
 argsD2	::= COM name:nm argsD2:rgsD 							{: RESULT = ", String " + nm + rgsD; :}
 			| 
@@ -78,8 +80,8 @@ val 	::= call:cl 											{: RESULT = cl; :}
 name 	::= IDENT:id 											{: RESULT = id ; :}
 			;
 
-code1 	::= name:nm 											{: RESULT = "return " + nm ";"; :}
-			| expr:xp 											{: RESULT = "return (" + xp ");"; :}	
+code1 	::= name:nm 											{: RESULT = "return " + nm +";"; :}
+			| expr:xp 											{: RESULT = "return (" + xp + ");"; :}	
 			//| val:vl 											{: RESULT = "return " + vl +" ;" ; :}
 			| 													{: RESULT = "return \"\";"; :}
 			;
