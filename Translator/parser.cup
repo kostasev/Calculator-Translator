@@ -25,7 +25,7 @@ terminal            COM, PLUS, LPAREN, RPAREN, LBRA, RBRA, IFSYM, ELSESYM, PREFI
 terminal String     STRINGL,IDENT ;        // our scanner provides numbers as strings
 
 /*  Non terminals */
-non terminal String 	prog,defs,def,calls,call,argsC,argsC2,val,code1,ifstm,cond,conds,oper,expr,exprs;
+non terminal String 	prog,defs,def,call,calls,args,argsRec,val,code_,ifstm,cond,conds,oper,expr,exprs;
 
 /**
  *  Precedence Declarations
@@ -36,72 +36,67 @@ precedence left PLUS;
  *  The Grammar Rules
  */
 
-prog 	::= defs:dfs calls:clls 								{: System.out.println("public class Main {\n" + clls + dfs + "\n}"); :}
+prog 	::= defs:d calls:c 					{: System.out.println("public class Main {\npublic static void main(String[] args) {\n" + c + "\n}" + d + "\n}"); :}
 			;
 
-defs	::= defs:dfs def:df 									{: RESULT = df + dfs; :}
-			|													{: RESULT = ""; :}
+defs	::= defs:ds def:d 	 				{: RESULT = ds + d; :}
+			|								{: RESULT = ""; :}
 			;
 
-def 	::= IDENT:nm LPAREN argsC:rgs1 RPAREN LBRA code1:cd RBRA	{: String words[]=rgs1.split(",");
-																	RESULT = "\npublic static String " + nm + "( " + words[0] + " ){ " + cd + "\n}"; :}
-			|IDENT:nm LPAREN RPAREN LBRA code1:cd RBRA 	{: RESULT = "\npublic static String " + nm + "( ){ " + cd + "\n}"; :}
-			;
-calls 	::= call:cl calls:cls 									{: RESULT = cl + cls; :}
-			//|call:cl 											{: RESULT = cl; :}
-			|													{: RESULT = ""; :}
-			;
-
-call 	::= IDENT:nm LPAREN argsC:rgs RPAREN 					{: RESULT = "\n\tSystem.out.println(" + nm + "( "+rgs+"));"; :}
-			|IDENT:nm LPAREN RPAREN 					{: RESULT = "\n\tSystem.out.println(" + nm + "( ));"; :}
-			;
-/*
-argsD 	::= IDENT:nm argsD2:rgsD									{: RESULT = "String " + nm + rgsD; :}
-			;
-argsD2	::= COM IDENT:nm argsD2:rgsD 							{: RESULT = ", String " + nm + rgsD; :}
-			| 													{: RESULT = ""; :}
-			;
-*/
-argsC 	::= expr:vl argsC2:rgsC								{: RESULT = vl + ","+ rgsC; :} 						
-			//|expr:vl argsC2:rgsC								{: RESULT = vl + ","+ rgsC; :}
-			;
-argsC2 	::= COM expr:vl argsC2:rgsC								{: RESULT = vl + ","+ rgsC; :}
-			//|COM expr:vl argsC2:rgsC								{: RESULT = vl + ","+ rgsC; :}
-			| 													{: RESULT = ""; :}
-			;
-val 	::= call:cl 											{: RESULT = cl; :}
-			|STRINGL:s 										{: RESULT = "\"" + s + "\""; :}
-			|ifstm:ifst 										{: RESULT = ifst; :}
+def 	::= IDENT:id LPAREN args:ar RPAREN LBRA code_:cd RBRA	
+											{: String words[]=ar.split(",");StringBuffer buf = new StringBuffer();
+											   for(int i=0;i<words.length;i++){buf.append(" String "+words[i]);if(i!=words.length-1){buf.append(",");}}
+											   RESULT = "\npublic static String " + id + "(" + buf.toString() + " ){" + cd + "\n}"; :}
+			|IDENT:id LPAREN RPAREN LBRA code_:cd RBRA 	
+											{: RESULT = "\npublic static String " + id + "( ){" + cd + "\n}"; :}
 			;
 
-//IDENT 	::= IDENT:id 											{: RESULT = id ; :}
-//			;
-
-code1 	::= //IDENT:nm 											{: RESULT = "return " + nm +";"; :}
-			 expr:xp 											{: RESULT = "return (" + xp + ");"; :}	
-			//| val:vl 											{: RESULT = "return " + vl +" ;" ; :}
-			| 													{: RESULT = "return \"\";"; :}
+calls 	::= call:c calls:cs 				{: RESULT = c + cs ; :}
+			|								{: RESULT = ""; :}
 			;
 
-ifstm 	::= IFSYM LPAREN cond:cnd RPAREN code1:cd1 ELSESYM code1:cd2
-																{: RESULT = "if( "+cnd+"){\n"+cd1 +"\n}" + "else {"+cd2+"\n}"; :}
-			;
-cond 	::= val:vl conds:cnds   								{: RESULT = vl + cnds; :}
-			|IDENT:vl conds:cnds   								{: RESULT = vl + cnds; :}
-			; 
-conds 	::= oper:op val:vl conds:cnds   						{: RESULT = op + vl + cnds; :}
-			|oper:op IDENT:vl conds:cnds   						{: RESULT = op + vl + cnds; :}
-			| 													{: RESULT = "" ; :}
-			;
-oper 	::= PREFIX:pref 										{: RESULT = "pref "; :} 
-			|SUFFIX:suf 										{: RESULT = "suffix "; :}
+call 	::= IDENT:id LPAREN args:ar RPAREN 	{: RESULT = "\nSystem.out.println(" + id + "( " + ar + "));"; :}
+			|IDENT:id LPAREN RPAREN 		{: RESULT = "\nSystem.out.println(" + id + "( ));"; :}
 			;
 
-
-expr 	::= val:vl exprs:exp 									{: RESULT =  vl + exp ;:}
-			|IDENT:nm exprs:exp
+args 	::= expr:ex argsRec:ar				{: RESULT = ex + ar; :} 						
 			;
-exprs 	::= PLUS val:vl exprs:exp 							{: RESULT = " + " + vl + exp; :}
-			|PLUS IDENT:nm exprs:exp 						{: RESULT = " + " + nm + exp; :}
-			| 													{: RESULT = "" ; :}
+
+argsRec 	::= COM expr:ex argsRec:ar 		{: RESULT = "," + ex + ar; :}
+			| 								{: RESULT = ""; :}
+			;
+
+val 	::= call:cl 						{: RESULT = cl; :}
+			|STRINGL:str					{: RESULT = "\""+str+"\""; :}
+			|ifstm:ifst 					{: RESULT = ifst; :}
+			;
+
+code_ 	::= expr:xp 						{: RESULT = "\nreturn " + xp + ";"; :}	
+			| 								{: RESULT = "\nreturn \"\";"; :}
+			;
+
+ifstm 	::= IFSYM LPAREN cond:cn RPAREN code_:c1 ELSESYM code_:c2
+											{: RESULT = "\nif( "+cn+" ) {\n"+c1 +"\n} else {\n"+c2+"\n}"; :}
+			;
+
+cond 	::= val:v conds:c   				{: RESULT = v + c; :}
+			|IDENT:v conds:c   				{: RESULT = v + c; :}
+			;
+
+conds 	::= oper:op val:vl conds:c   		{: RESULT = op + vl + c; :}
+			|oper:op IDENT:vl conds:c   	{: RESULT = op + vl + c; :}
+			| 								{: RESULT = "" ; :}
+			;
+
+oper 	::= PREFIX 		 					{: RESULT = " pref "; :} 
+			|SUFFIX 	 					{: RESULT = " suffix "; :}
+			;
+
+expr 	::= val:vl exprs:exp 				{: RESULT =  vl + exp ;:}
+			|IDENT:id exprs:exp 			{: RESULT =  id + exp ;:}
+			;
+
+exprs 	::= PLUS val:vl exprs:exp 			{: RESULT = " + " + vl + exp; :}
+			|PLUS IDENT:nm exprs:exp 		{: RESULT = " + " + nm + exp; :}
+			| 								{: RESULT = "" ; :}
 			;
