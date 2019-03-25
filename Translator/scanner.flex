@@ -57,7 +57,7 @@ LineTerminator = \r|\n|\r\n
 /* White space is a line terminator, space, tab, or line feed. */
 WhiteSpace     = {LineTerminator} | [ \t\f]
 Identifier = [:jletter:][:jletterdigit:]*
-
+Constant = "\"" ( " " | "\"" | [:jletterdigit:] )* "\""
 %state STRING
 
 %%
@@ -71,15 +71,15 @@ Identifier = [:jletter:][:jletterdigit:]*
  ","            { return symbol(sym.COM); }
  "{"            { return symbol(sym.LBRA); }
  "}"            { return symbol(sym.RBRA); }
- \"             { stringBuffer.setLength(0); yybegin(STRING); }
+//\"             { stringBuffer.setLength(0); yybegin(STRING); }
  "if"           { return symbol(sym.IFSYM); }
  "else"         { return symbol(sym.ELSESYM); }
  "prefix"       { return symbol(sym.PREFIX); }
  "suffix"       { return symbol(sym.SUFFIX); }
 }
-
+{Constant} { return symbol(sym.STRINGL, yytext()); }
 {WhiteSpace}   { /* just skip what was found, do nothing */ }
-{Identifier}   { return symbol(sym.IDENT); }
+{Identifier}   { return symbol(sym.IDENT,yytext()); }
 <STRING> {
       \"                             { yybegin(YYINITIAL);
                                        return symbol(sym.STRINGL, stringBuffer.toString()); }
