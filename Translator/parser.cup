@@ -36,7 +36,7 @@ precedence left PLUS;
  *  The Grammar Rules
  */
 
-prog 	::= defs:d calls:c 					{: System.out.println("public class Main {\npublic static void main(String[] args) {\n" + c + "\n}" + d + "\n}"); :}
+prog 	::= defs:d calls:c 					{: System.out.println("public class Main {\npublic static void main(String[] args) {" + c + "\n}" + d + "\n}"); :}
 			;
 
 defs	::= defs:ds def:d 	 				{: RESULT = ds + d; :}
@@ -51,12 +51,12 @@ def 	::= IDENT:id LPAREN args:ar RPAREN LBRA code_:cd RBRA
 											{: RESULT = "\npublic static String " + id + "( ){" + cd + "\n}"; :}
 			;
 
-calls 	::= call:c calls:cs 				{: RESULT = c + cs ; :}
+calls 	::= call:c calls:cs 				{: RESULT = "\nSystem.out.println(" + c + ");" + cs ; :}
 			|								{: RESULT = ""; :}
 			;
 
-call 	::= IDENT:id LPAREN args:ar RPAREN 	{: RESULT = "\nSystem.out.println(" + id + "( " + ar + "));"; :}
-			|IDENT:id LPAREN RPAREN 		{: RESULT = "\nSystem.out.println(" + id + "( ));"; :}
+call 	::= IDENT:id LPAREN args:ar RPAREN 	{: RESULT =  id + "( " + ar + ")"; :}
+			|IDENT:id LPAREN RPAREN 		{: RESULT =  id + "( )"; :}
 			;
 
 args 	::= expr:ex argsRec:ar				{: RESULT = ex + ar; :} 						
@@ -68,10 +68,11 @@ argsRec 	::= COM expr:ex argsRec:ar 		{: RESULT = "," + ex + ar; :}
 
 val 	::= call:cl 						{: RESULT = cl; :}
 			|STRINGL:str					{: RESULT = "\""+str+"\""; :}
-			|ifstm:ifst 					{: RESULT = ifst; :}
+			//|ifstm:ifst 					{: RESULT = ifst; :}
 			;
 
-code_ 	::= expr:xp 						{: RESULT = "\nreturn " + xp + ";"; :}	
+code_ 	::= expr:xp 						{: RESULT = "\nreturn " + xp + ";"; :}
+			|ifstm:ifs 						{: RESULT = ifs; :}
 			| 								{: RESULT = "\nreturn \"\";"; :}
 			;
 
@@ -83,13 +84,13 @@ cond 	::= val:v conds:c   				{: RESULT = v + c; :}
 			|IDENT:v conds:c   				{: RESULT = v + c; :}
 			;
 
-conds 	::= oper:op val:vl conds:c   		{: RESULT = op + vl + c; :}
-			|oper:op IDENT:vl conds:c   	{: RESULT = op + vl + c; :}
+conds 	::= oper:op val:vl   				{: RESULT = op + vl + ")"; :}
+			|oper:op IDENT:vl   			{: RESULT = op + vl + ")"; :}
 			| 								{: RESULT = "" ; :}
 			;
 
-oper 	::= PREFIX 		 					{: RESULT = " pref "; :} 
-			|SUFFIX 	 					{: RESULT = " suffix "; :}
+oper 	::= PREFIX 		 					{: RESULT = ".startsWith("; :} 
+			|SUFFIX 	 					{: RESULT = ".endsWith("; :}
 			;
 
 expr 	::= val:vl exprs:exp 				{: RESULT =  vl + exp ;:}

@@ -10,6 +10,6 @@
         first_name + sep + last_name
     }
 
-    name()
+    name(if (a prefix b) a else b, a )
     surname()
     fullname(name(), " " , surname())

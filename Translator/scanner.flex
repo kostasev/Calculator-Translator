@@ -71,7 +71,7 @@ Identifier = [:jletter:][:jletterdigit:]*
  ","            { return symbol(sym.COM); }
  "{"            { return symbol(sym.LBRA); }
  "}"            { return symbol(sym.RBRA); }
-  \"             { stringBuffer.setLength(0); yybegin(STRING); }
+  \"            { stringBuffer.setLength(0); yybegin(STRING); }
  "if"           { return symbol(sym.IFSYM); }
  "else"         { return symbol(sym.ELSESYM); }
  "prefix"       { return symbol(sym.PREFIX); }
