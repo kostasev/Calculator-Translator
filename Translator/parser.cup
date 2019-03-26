@@ -60,9 +60,11 @@ call 	::= IDENT:id LPAREN args:ar RPAREN 	{: RESULT =  id + "( " + ar + ")"; :}
 			;
 
 args 	::= expr:ex argsRec:ar				{: RESULT = ex + ar; :} 						
+			|ifstm:ex argsRec:ar				{: RESULT = ex + ar; :} 
 			;
 
-argsRec 	::= COM expr:ex argsRec:ar 		{: RESULT = "," + ex + ar; :}
+argsRec ::= COM expr:ex argsRec:ar 			{: RESULT = "," + ex + ar; :}
+			|COM ifstm:ex argsRec:ar 			{: RESULT = "," + ex + ar; :}
 			| 								{: RESULT = ""; :}
 			;
 
