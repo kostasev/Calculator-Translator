@@ -46,9 +46,9 @@ defs	::= defs:ds def:d 	 				{: RESULT = ds + d; :}
 def 	::= IDENT:id LPAREN args:ar RPAREN LBRA code_:cd RBRA	
 											{: String words[]=ar.split(",");StringBuffer buf = new StringBuffer();
 											   for(int i=0;i<words.length;i++){buf.append(" String "+words[i]);if(i!=words.length-1){buf.append(",");}}
-											   RESULT = "\npublic static String " + id + "(" + buf.toString() + " ){" + cd + "\n}"; :}
+											   RESULT = "\npublic static String " + id + "(" + buf.toString() + " ){\nreturn " + cd + " ;\n}"; :}
 			|IDENT:id LPAREN RPAREN LBRA code_:cd RBRA 	
-											{: RESULT = "\npublic static String " + id + "( ){" + cd + "\n}"; :}
+											{: RESULT = "\npublic static String " + id + "( ){\nreturn " + cd + " ;\n}"; :}
 			;
 
 calls 	::= call:c calls:cs 				{: RESULT = "\nSystem.out.println(" + c + ");" + cs ; :}
@@ -70,16 +70,15 @@ argsRec ::= COM expr:ex argsRec:ar 			{: RESULT = "," + ex + ar; :}
 
 val 	::= call:cl 						{: RESULT = cl; :}
 			|STRINGL:str					{: RESULT = "\""+str+"\""; :}
-			//|ifstm:ifst 					{: RESULT = ifst; :}
 			;
 
-code_ 	::= expr:xp 						{: RESULT = "\nreturn " + xp + ";"; :}
+code_ 	::= expr:xp 						{: RESULT = xp; :}
 			|ifstm:ifs 						{: RESULT = ifs; :}
-			| 								{: RESULT = "\nreturn \"\";"; :}
+			| 								{: RESULT = "\"\""; :}
 			;
 
 ifstm 	::= IFSYM LPAREN cond:cn RPAREN code_:c1 ELSESYM code_:c2
-											{: RESULT = "\nif( "+cn+" ) {\n"+c1 +"\n} else {\n"+c2+"\n}"; :}
+											{: RESULT = cn+"?"+c1 +":"+c2; :}
 			;
 
 cond 	::= val:v conds:c   				{: RESULT = v + c; :}
@@ -96,10 +95,12 @@ oper 	::= PREFIX 		 					{: RESULT = ".startsWith("; :}
 			;
 
 expr 	::= val:vl exprs:exp 				{: RESULT =  vl + exp ;:}
+			//|ifstm:id exprs:exp 			{: RESULT =  id + exp ;:}
 			|IDENT:id exprs:exp 			{: RESULT =  id + exp ;:}
 			;
 
 exprs 	::= PLUS val:vl exprs:exp 			{: RESULT = " + " + vl + exp; :}
 			|PLUS IDENT:nm exprs:exp 		{: RESULT = " + " + nm + exp; :}
+			//|PLUS ifstm:nm exprs:exp 		{: RESULT = " + " + nm + exp; :}
 			| 								{: RESULT = "" ; :}
 			;
