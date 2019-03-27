@@ -1,0 +1,100 @@
+/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
+/**
+ *  Package and Import Specifications
+ */
+import java_cup.runtime.*;
+
+/**
+ *  Usercode Components
+ */
+parser code {:
+    // Connect this parser to a scanner!
+    Scanner s;
+    Parser(Scanner s){ this.s=s; }
+:}
+
+/* define how to connect to the scanner! */
+scan with {: return s.next_token(); :};
+
+/**
+ *  Symbol Lists
+ */
+
+/* Terminals (tokens returned by the scanner). */
+terminal            PLUS, COM, LPAREN, RPAREN, LBRA, RBRA, IFSYM, ELSESYM, PREFIX, SUFFIX;
+terminal String     STRINGL,IDENT ;        // our scanner provides numbers as strings
+
+/*  Non terminals */
+non terminal String 	prog,defs,def,call,calls,val,args,argsRec,code_,ifstm,cond,conds,oper,expr,exprs;
+
+/**
+ *  Precedence Declarations
+ */
+precedence left PLUS;
+
+/**
+ *  The Grammar Rules
+ */
+
+prog 	::= defs:d calls:c 					{: System.out.println("public class Main {\npublic static void main(String[] args) {" + c + "\n}" + d + "\n}"); :}
+			;
+
+defs	::= defs:ds def:d 	 				{: RESULT = ds + d; :}
+			|								{: RESULT = ""; :}
+			;
+
+def 	::= IDENT:id LPAREN args:ar RPAREN LBRA code_:cd RBRA	
+											{: String words[]=ar.split(",");StringBuffer buf = new StringBuffer();
+											   for(int i=0;i<words.length;i++){buf.append(" String "+words[i]);if(i!=words.length-1){buf.append(",");}}
+											   RESULT = "\npublic static String " + id + "(" + buf.toString() + " ){\nreturn " + cd + " ;\n}"; :}
+			|IDENT:id LPAREN RPAREN LBRA code_:cd RBRA 	
+											{: RESULT = "\npublic static String " + id + "( ){\nreturn " + cd + " ;\n}"; :}
+			;
+
+calls 	::= call:c calls:cs 				{: RESULT = "\nSystem.out.println(" + c + ");" + cs ; :}
+			|								{: RESULT = ""; :}
+			;
+
+call 	::= IDENT:id LPAREN args:ar RPAREN 	{: RESULT =  id + "( " + ar + ")"; :}
+			|IDENT:id LPAREN RPAREN 		{: RESULT =  id + "( )"; :}
+			;
+
+args 	::= expr:ex argsRec:ar				{: RESULT = ex + ar; :} 
+			;
+
+argsRec ::= COM args:ar 					{: RESULT = "," +  ar; :}
+			| 								{: RESULT = ""; :}
+			;
+
+val 	::= call:cl 						{: RESULT = cl; :}
+			|STRINGL:str					{: RESULT = "\""+str+"\""; :}
+			|ifstm:ifs 						{: RESULT = ifs; :}
+			|IDENT:ifs 						{: RESULT = ifs; :}
+			;
+
+code_ 	::= expr:xp 						{: RESULT = xp; :}
+			| 								{: RESULT = "\"\""; :}
+			;
+
+ifstm 	::= IFSYM LPAREN cond:cn RPAREN code_:c1 ELSESYM code_:c2
+											{: RESULT = "("+cn+"?"+c1 +":"+c2+")"; :}
+			;
+
+cond 	::= val:v conds:c   				{: RESULT = v + c; :}
+			;
+
+conds 	::= oper:op val:vl   				{: RESULT = op + vl + ")"; :}
+			| 								{: RESULT = "" ; :}
+			;
+
+oper 	::= PREFIX 		 					{: RESULT = ".startsWith("; :} 
+			|SUFFIX 	 					{: RESULT = ".endsWith("; :}
+			;
+
+expr 	::= val:vl PLUS val:vl2 exprs:exp   {: RESULT =  vl +"+"+vl2+ exp ;:}
+			|val:vl 						{: RESULT =  vl; :}
+			;
+
+exprs 	::= PLUS expr:exp 					{:RESULT = "+" + exp; :}
+			| 								{: RESULT = "" ; :}
+			;

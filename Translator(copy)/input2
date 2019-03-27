@@ -1,0 +1,27 @@
+    name(a,b)  {
+        if( if (a prefix b)
+    a
+    else
+    b
+    prefix 
+    if (a prefix b)
+    a
+    else
+    b
+)
+    a
+else
+    b
+    }
+    
+    surname() {
+        "Doe"
+    }
+    
+    fullname(first_name, sep, last_name) {
+        first_name + sep + last_name
+    }
+
+    name("ae","aek")
+    surname()
+    fullname(name(), if( "x" prefix "xirosima") "-" else "+" , surname())
