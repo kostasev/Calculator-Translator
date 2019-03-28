@@ -80,10 +80,10 @@ ifstm 	::= IFSYM LPAREN cond:cn RPAREN code_:c1 ELSESYM code_:c2
 											{: RESULT = "("+cn+"?"+c1 +":"+c2+")"; :}
 			;
 
-cond 	::= val:v conds:c   				{: RESULT = v + c; :}
+cond 	::= expr:v conds:c   				{: RESULT = "(" + v + ")" + c; :}
 			;
 
-conds 	::= oper:op val:vl   				{: RESULT = op + vl + ")"; :}
+conds 	::= oper:op expr:vl   				{: RESULT = op + vl + ")"; :}
 			| 								{: RESULT = "" ; :}
 			;
 

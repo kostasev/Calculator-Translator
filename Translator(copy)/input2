@@ -1,5 +1,5 @@
     name(a,b)  {
-        if( if (a prefix b)
+        if( if (a+b prefix b)
     a
     else
     b
@@ -14,14 +14,17 @@ else
     b
     }
     
-    surname() {
-        "Doe"
+    surname(x) {
+        "Doe"+x
     }
     
     fullname(first_name, sep, last_name) {
         first_name + sep + last_name
     }
 
-    name("ae","aek")
-    surname()
-    fullname(name(), if( "x" prefix "xirosima") "-" else "+" , surname())
+    name("ae" + "x","aek"+if ("z" suffix "s")
+    "z"
+    else
+    "s")
+    surname("aa")
+    fullname(name("ae" + "x", if("aa" suffix "bbaa") "z"+name("aaa","bbb" )else if ("zz"+"nn" prefix "zn") "zn" else "snik"+"hustla"), "x" + name("aaa","bbb") + if( "x" prefix "xirosima") "-" else "+" + "a" + surname("a"), name(name("aa","aa")+surname("bb"),"aaa"))
