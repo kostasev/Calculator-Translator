@@ -86,7 +86,7 @@ cond 	::= expr:v conds:c   				{: RESULT = "(" + v + ")" + c; :}
 conds 	::= oper:op expr:vl   				{: RESULT = op + vl + ")"; :}
 			| 								{: RESULT = "" ; :}
 			;
-
+//mipws na svisoume to conds
 oper 	::= PREFIX 		 					{: RESULT = ".startsWith("; :} 
 			|SUFFIX 	 					{: RESULT = ".endsWith("; :}
 			;

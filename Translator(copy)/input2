@@ -1,30 +1,42 @@
     name(a,b)  {
         if( if (a+b prefix b)
-    a
-    else
-    b
-    prefix 
-    if (a prefix b)
-    a
-    else
-    b
-)
-    a
-else
-    b
+        a
+        else
+        b
+        prefix 
+        if (a prefix b)
+        a
+        else
+        b
+        )
+        a
+        else
+        b
+        +
+        if( if (a+b prefix b)
+        a
+        else
+        b
+        prefix 
+        if (a prefix b)
+        a
+        else
+        b
+        )
+        a
+        else
+        b
+
     }
     
     surname(x) {
-        "Doe"+x
+        "Doe_"+ x + if( x prefix "Doe") "opoulos" else "idis"
     }
     
     fullname(first_name, sep, last_name) {
-        first_name + sep + last_name
+        first_name + sep + last_name + surname(if(first_name suffix last_name)"aa\n\t\\\r\b" else "bb")
     }
 
-    name("ae" + "x","aek"+if ("z" suffix "s")
-    "z"
-    else
-    "s")
+    name("ae" + "x","aek"+if ("z" suffix "s") "z" else "s")
     surname("aa")
-    fullname(name("ae" + "x", if("aa" suffix "bbaa") "z"+name("aaa","bbb" )else if ("zz"+"nn" prefix "zn") "zn" else "snik"+"hustla"), "x" + name("aaa","bbb") + if( "x" prefix "xirosima") "-" else "+" + "a" + surname("a"), name(name("aa","aa")+surname("bb"),"aaa"))
+    fullname(name("aek" + "paok", if("osfp" suffix "pao") "aris" + name("kavouras","noor" ) else if ("lemonis"+"ketspaia" prefix "zn") "zn" else "snik"+"hustla"), "pasok" + name("erga","maketo") + if( "nte" prefix "lafou") "-" else "_" + "a" + surname("trakis"), name(name("hunt","jl")+surname("rip"),"lel"))

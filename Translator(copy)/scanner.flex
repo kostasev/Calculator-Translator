@@ -85,7 +85,7 @@ Identifier = [:jletter:][:jletterdigit:]*
                                        return symbol(sym.STRINGL, stringBuffer.toString()); }
       [^\n\r\"\\]+                   { stringBuffer.append( yytext() ); }
       \\t                            { stringBuffer.append('\t'); }
-      \\n                            { stringBuffer.append('\n'); }
+      \\n                            { stringBuffer.append("\\n"); }
 
       \\r                            { stringBuffer.append('\r'); }
       \\\"                           { stringBuffer.append('\"'); }
