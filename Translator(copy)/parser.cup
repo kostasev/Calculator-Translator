@@ -25,7 +25,7 @@ terminal            PLUS, COM, LPAREN, RPAREN, LBRA, RBRA, IFSYM, ELSESYM, PREFI
 terminal String     STRINGL,IDENT ;        // our scanner provides numbers as strings
 
 /*  Non terminals */
-non terminal String 	prog,defs,def,call,calls,val,args,argsRec,code_,ifstm,cond,conds,oper,expr,exprs;
+non terminal String 	prog,defs,def,call,calls,val,args,argsRec,code_,ifstm,cond,oper,expr,exprs;
 
 /**
  *  Precedence Declarations
@@ -77,16 +77,12 @@ code_ 	::= expr:xp 						{: RESULT = xp; :}
 			;
 
 ifstm 	::= IFSYM LPAREN cond:cn RPAREN code_:c1 ELSESYM code_:c2
-											{: RESULT = "("+cn+"?"+c1 +":"+c2+")"; :}
+											{: RESULT = "(" + cn+"?"+c1 +":"+c2 + ")"; :}
 			;
 
-cond 	::= expr:v conds:c   				{: RESULT = "(" + v + ")" + c; :}
+cond 	::= expr:v oper:op expr:vl  		{: RESULT = "(" + vl + ")" + op + v + ")"; :}
 			;
 
-conds 	::= oper:op expr:vl   				{: RESULT = op + vl + ")"; :}
-			| 								{: RESULT = "" ; :}
-			;
-//mipws na svisoume to conds
 oper 	::= PREFIX 		 					{: RESULT = ".startsWith("; :} 
 			|SUFFIX 	 					{: RESULT = ".endsWith("; :}
 			;
